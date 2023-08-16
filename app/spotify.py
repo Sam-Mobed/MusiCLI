@@ -37,5 +37,40 @@ def get_token()->str:
 def get_auth_header(token:str)->dict:
     return {"Authorization": "Bearer " + token}
 
-def get_album(token:str):
+def search_album(token:str, artist:str, album_name:str):
+    url = 'https://api.spotify.com/v1/search'
+    headers = get_auth_header(token)
+    query = f"?q=album:{album_name}%20artist:{artist}&type=album&limit=1"
+
+    query_url = url+query
+    result = get(query_url, headers=headers)
+    json_result = loads(result.content)
+
+    if 'albums' in json_result and 'items' in json_result['albums'] and len(json_result['albums']['items']) > 0:
+        album_id = json_result['albums']['items'][0]['id']
+        return album_id
+
+    return None
+
+def get_album_tracks(token:str, id:str):
+    url = f'https://api.spotify.com/v1/albums/{id}/tracks'
+    headers = get_auth_header(token)
+
+    result = get(url, headers=headers)
+    json_result = loads(result.content)
+
+    track_names = []
+    if 'items' in json_result:
+        for track in json_result['items']:
+            if 'name' in track:
+                track_names.append(track['name'])
+
+    return track_names
+
+def album_results(token:str):
     pass
+
+id = search_album(get_token(),"Drake", "Certified Lover Boy")
+tracks = get_album_tracks(get_token(),id)
+print(tracks)
+#print(x)
