@@ -1,5 +1,5 @@
 from pyfiglet import figlet_format
-from simple_chalk import chalk, green, yellow, blue
+from simple_chalk import chalk, green, yellow, blue, red
 from inquirer import list_input, Path
 
 def welcomeMsg()->None:
@@ -22,8 +22,9 @@ def getfilePath()->str:
     #has built in validation for path, unlike simple text input
     return Path('music_file', message='Where is the csv/excel file located? ', path_type=Path.FILE)
 
-def platformList()->str:
-    return displayInqList('Please choose a platform: ', ['Spotify', 'Apple Music', 'Return', 'Exit'])
+def gettingAuthorization()->None:
+    print(chalk.red('Note that downloading or uploading songs from/to private playlists requires you to authenticate yourself. This process only has to be done once;\n \
+                    If  you ever wish to remove authorization from this app, you can simply do so from within your Spotify account.'))
 
 def goodByeMsg()->None:
     print(chalk.blue('Thank you for trying the app, have a good day! \U0001F600'))

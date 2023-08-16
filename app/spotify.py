@@ -6,6 +6,8 @@ from requests import post,get
 from json import loads
 from webbrowser import open
 
+redirect_uri = 'http://localhost:3000/callback'
+
 def loadEnvVars()->Tuple[str,str]:
     load_dotenv()
 
@@ -38,18 +40,39 @@ def get_client_token()->str:
 
 #this functions returns another type of access token; one with which we will
 #be able to access user information
-def get_authorization_token()->str:
+def get_authorization_code()->None:
     #build the URL where user will login.
     url = 'https://accounts.spotify.com/authorize'
     id = loadEnvVars()[0]
-    scopes = 'playlist-modify-private%20uplaylist-modify-public%20uuser-library-modify%20uuser-library-read'
-    redirect_uri = 'http://localhost:3000/callback'
+    scopes = 'playlist-modify-private,playlist-modify-public,user-library-modify,user-library-read'
     query=f'?client_id={id}&response_type=code&redirect_uri={redirect_uri}&scope={scopes}'
 
     auth_url = url + query
     open(auth_url)
 
-    pass
+def get_authorization_token(code:str)->str:
+    id,secret = loadEnvVars()
+    auth_string = f"{id}:{secret}"
+    auth_bytes = auth_string.encode("utf-8")
+    auth_base64 = str(b64encode(auth_bytes), "utf-8")
+
+    url = "https://accounts.spotify.com/api/token"
+
+    headers = {
+        "Authorization": "Basic " + auth_base64,
+    }
+
+    data = {
+        "code": code,
+        "redirect_uri": redirect_uri,
+        "grant_type": "authorization_code"
+    }
+
+    result = post(url,headers=headers,data=data)
+
+    json_result = loads(result.content)
+    token = json_result["access_token"]
+    return token
 
 def get_auth_header(token:str)->dict:
     return {"Authorization": "Bearer " + token}
@@ -90,4 +113,3 @@ def album_results(token:str):
 #id = search_album(get_token(),"Drake", "Certified Lover Boy")
 #tracks = get_album_tracks(get_token(),id)
 #print(tracks)
-get_authorization_token()
