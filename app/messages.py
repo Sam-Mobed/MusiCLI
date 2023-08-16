@@ -13,14 +13,17 @@ def displayInqList(question:str, options: list[str])->str:
     return list_input(question, choices=options)
 
 def actionList()->str:
-    return displayInqList('What would you like to do? ', ['Download a playlist into a file', 'Upload the songs inside a file to a playlist', 'Help', 'Exit'])
+    return displayInqList('What would you like to do? ', ['Download an album or a playlist into a file' ,'Upload the songs inside a file to a playlist', 'Help', 'Exit'])
+
+def spotify_download()->str:
+    return displayInqList('Would you like to download an album or a user\'s playlist? Note that you need the user\'s credentials in order to access their private playlists.', ['An album' ,'A user\'s playlist', 'Help', 'Return','Exit'])
 
 def getfilePath()->str:
     #has built in validation for path, unlike simple text input
     return Path('music_file', message='Where is the csv/excel file located? ', path_type=Path.FILE)
 
 def platformList()->str:
-    return displayInqList('Please choose a platform: ', ['Spotify', 'Apple Music', 'Amazon Music', 'Return'])
+    return displayInqList('Please choose a platform: ', ['Spotify', 'Apple Music', 'Return', 'Exit'])
 
 def goodByeMsg()->None:
     print(chalk.blue('Thank you for trying the app, have a good day! \U0001F600'))

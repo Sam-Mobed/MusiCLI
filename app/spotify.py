@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from os import getenv
 from typing import Tuple
 from base64 import b64encode
-from requests import post
+from requests import post,get
 from json import loads
 
 def loadEnvVars()->Tuple[str,str]:
@@ -34,4 +34,8 @@ def get_token()->str:
     token = json_result["access_token"]
     return token
 
-print(type(get_token()))
+def get_auth_header(token:str)->dict:
+    return {"Authorization": "Bearer " + token}
+
+def get_album(token:str):
+    pass
