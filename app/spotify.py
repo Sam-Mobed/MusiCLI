@@ -4,6 +4,7 @@ from typing import Tuple
 from base64 import b64encode
 from requests import post,get
 from json import loads
+from webbrowser import open
 
 def loadEnvVars()->Tuple[str,str]:
     load_dotenv()
@@ -15,7 +16,8 @@ def loadEnvVars()->Tuple[str,str]:
 
 #we need to create an authorization string, that we encode in base 64
 #this entails concatinating our client id and client secret, and then encode it.
-def get_token()->str:
+#this token does not give access to user information
+def get_client_token()->str:
     id,secret = loadEnvVars()
     auth_string = f"{id}:{secret}"
     auth_bytes = auth_string.encode("utf-8")
@@ -33,6 +35,21 @@ def get_token()->str:
     json_result = loads(result.content)
     token = json_result["access_token"]
     return token
+
+#this functions returns another type of access token; one with which we will
+#be able to access user information
+def get_authorization_token()->str:
+    #build the URL where user will login.
+    url = 'https://accounts.spotify.com/authorize'
+    id = loadEnvVars()[0]
+    scopes = 'playlist-modify-private%20uplaylist-modify-public%20uuser-library-modify%20uuser-library-read'
+    redirect_uri = 'http://localhost:3000/callback'
+    query=f'?client_id={id}&response_type=code&redirect_uri={redirect_uri}&scope={scopes}'
+
+    auth_url = url + query
+    open(auth_url)
+
+    pass
 
 def get_auth_header(token:str)->dict:
     return {"Authorization": "Bearer " + token}
@@ -70,7 +87,7 @@ def get_album_tracks(token:str, id:str):
 def album_results(token:str):
     pass
 
-id = search_album(get_token(),"Drake", "Certified Lover Boy")
-tracks = get_album_tracks(get_token(),id)
-print(tracks)
-#print(x)
+#id = search_album(get_token(),"Drake", "Certified Lover Boy")
+#tracks = get_album_tracks(get_token(),id)
+#print(tracks)
+get_authorization_token()
