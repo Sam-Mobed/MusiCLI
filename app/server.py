@@ -4,7 +4,7 @@ Not necessary, but without it the user would have to copy and paste the redirect
 the callback uri:http://localhost:3000/callback
 '''
 from flask import Flask, request, render_template
-from spotify import get_authorization_code
+from spotify import get_authorization_token
 from waitress import serve
 
 def start_server()->None:
@@ -13,7 +13,7 @@ def start_server()->None:
     @app.route('/callback')
     def callback()->str:
         authorization_code = request.args.get('code')
-        get_authorization_code(authorization_code)
+        get_authorization_token(authorization_code)
         if authorization_code:
             return render_template("index.html")
         else:

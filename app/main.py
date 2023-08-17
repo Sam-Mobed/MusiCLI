@@ -1,7 +1,7 @@
-from messages import welcomeMsg,goodByeMsg,actionList,helpMsg,spotify_download,gettingAuthorization
+from messages import welcomeMsg,goodByeMsg,actionList,helpMsg,spotify_download,gettingAuthorization, authorizationSuccessful, getPlaylist
 from server import start_server
 from sys import exit
-from spotify import get_authorization_code
+from spotify import get_authorization_code, getLikedSongs
 import threading
 
 def endProgram()->None:
@@ -19,6 +19,11 @@ def download()->None:
         elif choice=='A user\'s playlist':
             gettingAuthorization()
             get_authorization_code()
+            authorizationSuccessful()
+            playlist, format = getPlaylist()
+            if playlist['playlist_name']=='Liked Songs':
+                print(getLikedSongs())
+            break
         else:
             endProgram()
     

@@ -7,6 +7,7 @@ from json import loads
 from webbrowser import open
 
 redirect_uri = 'http://localhost:3000/callback'
+USER_AUTH_TOKEN = None
 
 def loadEnvVars()->Tuple[str,str]:
     load_dotenv()
@@ -15,6 +16,8 @@ def loadEnvVars()->Tuple[str,str]:
     spotify_client_secret = getenv("CLIENT_SECRET_SPOTIFY")
 
     return spotify_client_id, spotify_client_secret
+
+
 
 #we need to create an authorization string, that we encode in base 64
 #this entails concatinating our client id and client secret, and then encode it.
@@ -42,15 +45,16 @@ def get_client_token()->str:
 #be able to access user information
 def get_authorization_code()->None:
     #build the URL where user will login.
-    url = 'https://accounts.spotify.com/authorize'
     id = loadEnvVars()[0]
-    scopes = 'playlist-modify-private,playlist-modify-public,user-library-modify,user-library-read'
+    url = 'https://accounts.spotify.com/authorize'
+    scopes = 'playlist-modify-private,playlist-modify-public,user-library-modify,user-library-read,playlist-read-private'
     query=f'?client_id={id}&response_type=code&redirect_uri={redirect_uri}&scope={scopes}'
 
     auth_url = url + query
     open(auth_url)
 
 def get_authorization_token(code:str)->str:
+    global USER_AUTH_TOKEN
     id,secret = loadEnvVars()
     auth_string = f"{id}:{secret}"
     auth_bytes = auth_string.encode("utf-8")
@@ -72,10 +76,29 @@ def get_authorization_token(code:str)->str:
 
     json_result = loads(result.content)
     token = json_result["access_token"]
-    return token
+    USER_AUTH_TOKEN = token
 
 def get_auth_header(token:str)->dict:
     return {"Authorization": "Bearer " + token}
+
+def get_playlist_tracks(id:str,token:str):
+    url = f'https://api.spotify.com/v1/playlists/{id}/tracks'
+    query = '?fields=items%28track%28name%2Cartists%28name%29%2Calbum%28name%29%29%29'
+    query_url = url+query
+    headers = get_auth_header(token)
+
+    result = get(query_url, headers=headers)
+    json_result = loads(result.content)
+    
+    tracks = []
+    if 'items' in json_result:
+        for track_info in json_result['items']:
+            song=track_info['track']['name']
+            artist=track_info['track']['artists'][0]['name']
+            album=track_info['track']['album']['name']
+            tracks.append([song,artist,album])
+
+    return tracks
 
 def search_album(token:str, artist:str, album_name:str):
     url = 'https://api.spotify.com/v1/search'
@@ -104,12 +127,69 @@ def get_album_tracks(token:str, id:str):
         for track in json_result['items']:
             if 'name' in track:
                 track_names.append(track['name'])
-
+        
     return track_names
 
-def album_results(token:str):
-    pass
+def get_playlist_id(link:str)->str:
+    parse1 = link.split('/')[-1]
+    id = parse1.split('?')[0]
+    return id
 
-#id = search_album(get_token(),"Drake", "Certified Lover Boy")
-#tracks = get_album_tracks(get_token(),id)
+#id = search_album(get_client_token(),"Drake", "Certified Lover Boy")
+#tracks = get_album_tracks(get_client_token(),id)
 #print(tracks)
+
+token = get_client_token()
+#id = search_public_playlist(token, "Japanese Lofi HipHop", "thebootlegboy")
+id = get_playlist_id('https://open.spotify.com/playlist/37i9dQZF1DWTypZHlgEy1G?si=e2cff0697d8d4237')
+tracks = get_playlist_tracks(id,token)
+print(tracks)
+print(len(tracks))
+
+#print(get_playlist_tracks(id,token))
+
+
+'''
+def getLikedSongs():
+    global USER_AUTH_TOKEN
+    url = 'https://api.spotify.com/v1/me/tracks'
+    #query = '?offset=0&limit=10'
+    #url = 'https://api.spotify.com/v1/me/playlists'
+    if not USER_AUTH_TOKEN:
+        print('Error')
+        return
+    headers = get_auth_header(USER_AUTH_TOKEN)
+
+    #url_query = url+query
+    #print(url_query)
+    result = get(url, headers=headers)
+    json_result = loads(result.content)
+    return json_result
+
+    def getLikedSongs():
+    global USER_AUTH_TOKEN
+    url = 'https://api.spotify.com/v1/me/playlists'
+    headers = get_auth_header(USER_AUTH_TOKEN)
+
+    result = get(url, headers=headers)
+    print(result)
+    return
+    playlists_data = loads(result.content)
+    print(playlists_data)
+    liked_songs_playlist_id = None
+
+    for playlist in playlists_data['items']:
+        if playlist['name'] == 'Liked Songs':
+            liked_songs_playlist_id = playlist['id']
+            break
+
+    if liked_songs_playlist_id:
+        liked_songs_url = f'https://api.spotify.com/v1/playlists/{liked_songs_playlist_id}/tracks'
+        result = get(liked_songs_url, headers=headers)
+        liked_songs_data = loads(result.content)
+        return liked_songs_data['items']
+    else:
+        print("Liked Songs playlist not found.")
+        return []
+
+    '''

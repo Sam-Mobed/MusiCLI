@@ -1,6 +1,7 @@
 from pyfiglet import figlet_format
 from simple_chalk import chalk, green, yellow, blue, red
-from inquirer import list_input, Path
+from inquirer import list_input, Path, Text, prompt
+from typing import Tuple
 
 def welcomeMsg()->None:
     print(figlet_format('MusiCLI', font='isometric3',justify='left', width=240))
@@ -16,7 +17,7 @@ def actionList()->str:
     return displayInqList('What would you like to do? ', ['Download an album or a playlist into a file' ,'Upload the songs inside a file to a playlist', 'Help', 'Exit'])
 
 def spotify_download()->str:
-    return displayInqList('Would you like to download an album or a user\'s playlist? Note that you need the user\'s credentials in order to access their private playlists.', ['An album' ,'A user\'s playlist', 'Help', 'Return','Exit'])
+    return displayInqList('Would you like to download an album or a user\'s playlist? Note that you need the user\'s credentials in order to access their private playlists.', ['An album' , 'A public playlist', 'A user\'s playlist', 'Help', 'Return','Exit'])
 
 def getfilePath()->str:
     #has built in validation for path, unlike simple text input
@@ -24,7 +25,16 @@ def getfilePath()->str:
 
 def gettingAuthorization()->None:
     print(chalk.red('Note that downloading or uploading songs from/to private playlists requires you to authenticate yourself. This process only has to be done once;\n \
-                    If  you ever wish to remove authorization from this app, you can simply do so from within your Spotify account.'))
+If  you ever wish to remove authorization from this app, you can simply do so from within your Spotify account.'))
+    
+def authorizationSuccessful()->None:
+    print(chalk.green('Authorization successful! Please enter the name of the playlist that you would like to download (or just type \'Liked Songs\'), along with the desired format of the file that will contain the songs.'))
+
+def getPlaylist()->Tuple[str,str]:
+    question = [Text('playlist_name', message="What is the name of the playlist?")]
+    playlist_name = prompt(question)
+    format = displayInqList('In what type of file would you like to store the contetn of the playlist?', ['csv', 'excel'])
+    return playlist_name,format
 
 def goodByeMsg()->None:
     print(chalk.blue('Thank you for trying the app, have a good day! \U0001F600'))
