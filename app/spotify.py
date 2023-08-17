@@ -77,6 +77,7 @@ def get_authorization_token(code:str)->str:
     json_result = loads(result.content)
     token = json_result["access_token"]
     USER_AUTH_TOKEN = token
+    getUserPlaylists(USER_AUTH_TOKEN)
 
 def get_auth_header(token:str)->dict:
     return {"Authorization": "Bearer " + token}
@@ -99,6 +100,21 @@ def get_playlist_tracks(id:str,token:str):
             tracks.append([song,artist,album])
 
     return tracks
+
+def getUserPlaylists(token:str):
+    #token = USER_AUTH_TOKEN
+    url = 'https://api.spotify.com/v1/me/playlists'
+    headers = get_auth_header(token)
+    query_params = {'limit':50}
+    result = get(url, headers=headers, params=query_params)
+    json_result = loads(result.content)
+
+    names = []
+    if 'items' in json_result:
+        for private_playlist in json_result['items']:
+            names.append(private_playlist['name'])
+    
+    print(names)
 
 def search_album(token:str, artist:str, album_name:str):
     url = 'https://api.spotify.com/v1/search'
@@ -139,12 +155,11 @@ def get_playlist_id(link:str)->str:
 #tracks = get_album_tracks(get_client_token(),id)
 #print(tracks)
 
-token = get_client_token()
-#id = search_public_playlist(token, "Japanese Lofi HipHop", "thebootlegboy")
-id = get_playlist_id('https://open.spotify.com/playlist/37i9dQZF1DWTypZHlgEy1G?si=e2cff0697d8d4237')
-tracks = get_playlist_tracks(id,token)
-print(tracks)
-print(len(tracks))
+#token = get_client_token()
+#id = get_playlist_id('https://open.spotify.com/playlist/1kJZPtslUiZW2dShm2oN2Q?si=de737c039b274ab8')
+#tracks = get_playlist_tracks(id,token)
+#print(tracks)
+#print(len(tracks))
 
 #print(get_playlist_tracks(id,token))
 

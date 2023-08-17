@@ -1,7 +1,7 @@
-from messages import welcomeMsg,goodByeMsg,actionList,helpMsg,spotify_download,gettingAuthorization, authorizationSuccessful, getPlaylist
+from messages import welcomeMsg,goodByeMsg,actionList,helpMsg,spotify_download,getPublicPlaylistURL
 from server import start_server
 from sys import exit
-from spotify import get_authorization_code, getLikedSongs
+from spotify import get_authorization_code,get_playlist_id,get_client_token,get_playlist_tracks,getUserPlaylists
 import threading
 
 def endProgram()->None:
@@ -13,17 +13,23 @@ def download()->None:
     choice = spotify_download()
     while True:
         if choice=='Return':
-            break
+            return
         elif choice=='An album':
             pass
+        elif choice=='A public playlist':
+            playlist_link = getPublicPlaylistURL()
+            token = get_client_token()
+            #ask for the format of the file
+            #ask for the location where he wants to store the file.
+            print(get_playlist_tracks(get_playlist_id(playlist_link),token))
+            #break out of the current loop, call another function
+            return
         elif choice=='A user\'s playlist':
-            gettingAuthorization()
             get_authorization_code()
-            authorizationSuccessful()
-            playlist, format = getPlaylist()
-            if playlist['playlist_name']=='Liked Songs':
-                print(getLikedSongs())
-            break
+            return
+        elif choice=='Help':
+            helpMsg()
+            choice = spotify_download()
         else:
             endProgram()
     

@@ -6,6 +6,7 @@ the callback uri:http://localhost:3000/callback
 from flask import Flask, request, render_template
 from spotify import get_authorization_token
 from waitress import serve
+from messages import authorizationSuccessful
 
 def start_server()->None:
     app = Flask(__name__)
@@ -13,8 +14,9 @@ def start_server()->None:
     @app.route('/callback')
     def callback()->str:
         authorization_code = request.args.get('code')
-        get_authorization_token(authorization_code)
         if authorization_code:
+            get_authorization_token(authorization_code)
+            authorizationSuccessful()
             return render_template("index.html")
         else:
             return 'Authorization failed. Please close this window and try again.'

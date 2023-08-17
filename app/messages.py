@@ -17,7 +17,8 @@ def actionList()->str:
     return displayInqList('What would you like to do? ', ['Download an album or a playlist into a file' ,'Upload the songs inside a file to a playlist', 'Help', 'Exit'])
 
 def spotify_download()->str:
-    return displayInqList('Would you like to download an album or a user\'s playlist? Note that you need the user\'s credentials in order to access their private playlists.', ['An album' , 'A public playlist', 'A user\'s playlist', 'Help', 'Return','Exit'])
+    gettingAuthorization()
+    return displayInqList('Would you like to download an album or a user\'s playlist?', ['An album' , 'A public playlist', 'A user\'s playlist', 'Help', 'Return','Exit'])
 
 def getfilePath()->str:
     #has built in validation for path, unlike simple text input
@@ -27,8 +28,13 @@ def gettingAuthorization()->None:
     print(chalk.red('Note that downloading or uploading songs from/to private playlists requires you to authenticate yourself. This process only has to be done once;\n \
 If  you ever wish to remove authorization from this app, you can simply do so from within your Spotify account.'))
     
+def getPublicPlaylistURL()->str:
+    question = [Text('playlist_url', message="What is the link of the playlist that you would like to download?")]
+    answers = prompt(question)
+    return answers['playlist_url']
+    
 def authorizationSuccessful()->None:
-    print(chalk.green('Authorization successful! Please enter the name of the playlist that you would like to download (or just type \'Liked Songs\'), along with the desired format of the file that will contain the songs.'))
+    print(chalk.green('Authorization successful!'))
 
 def getPlaylist()->Tuple[str,str]:
     question = [Text('playlist_name', message="What is the name of the playlist?")]
