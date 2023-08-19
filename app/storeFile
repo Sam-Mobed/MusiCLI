@@ -53,5 +53,4 @@ def storeInExcel(path_to_store:str, songs: List[str])->int:
         df.to_excel(filename,index=False)
     else:
         return 1
-
     return 0
