@@ -1,0 +1,57 @@
+from typing import List
+from os import path
+from csv import writer
+import pandas as pd
+#store to csv file
+#as of now we store the following info song_name, artist, album_name
+#but more information can be stored later on.
+def isDirectory(path_to_check:str)->bool:
+    if path.isdir(path_to_check):
+        return True
+    else:
+        return False
+    
+def findFileName(path_name:str, extension:str)->str:
+    counter = 0
+    filename = f'importedPlaylist_{counter}.{extension}'
+    path_file = path.join(path_name,filename)
+
+    while path.isfile(path_file):
+        counter+=1
+        filename = f'importedPlaylist_{counter}.{extension}'
+        path_file = path.join(path_name,filename)
+    
+    return path_file
+
+
+def storeInCSV(path_to_store:str, songs: List[str])->int:
+    #check if the path is valid
+    #either take in the path or the name of the directory
+    #if the file exists already, create a new one.
+    #first line, song,artist, album. the rest contains the actual info
+    if isDirectory(path_to_store):
+        filename = findFileName(path_to_store, 'csv')
+        with open(filename, 'w', newline='') as file:
+            #how you handle the newline is specific to the platform that you are on. the empty string ensures consistent behavior across platforms.
+            csv_writer = writer(file)
+
+            for line in songs:
+                csv_writer.writerow([line])
+            #file.close() the with block automatically takes care of closing
+    else:
+        return 1
+
+    return 0
+
+#store to excel file
+def storeInExcel(path_to_store:str, songs: List[str])->int:
+    if isDirectory(path_to_store):
+        filename = findFileName(path_to_store, 'xlsx')
+        
+        df  = pd.DataFrame(songs, columns = ["Song Name", "Artist", "Album Name"])
+
+        df.to_excel(filename,index=False)
+    else:
+        return 1
+
+    return 0
